@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        canvas {
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 30px;
+            display: flex;
+        }
+    </style>
+    <script src="Rectangle.js"></script>
+    <script src="Circle.js"></script>
+
+</head>
+<body>
+<canvas id="myCanvas" width="800" height="600" style="border: solid red"></canvas>
+</body>
+<script>
+    let canvas = document.getElementById('myCanvas');
+    let ctx = canvas.getContext('2d');
+    //Lấy chiều dài chiều rộng của khung canvas
+    let widthCanvas = canvas.width;
+    let heightCanvas = canvas.height;
+    //Khai báo thuộc tính cho: Paddle
+    let widthPaddle = 200;
+    let heightPaddle = 30;
+    let xPaddle = (widthCanvas - widthPaddle)/2;
+    let yPaddle = heightCanvas - heightPaddle;
+    let colorPaddle = 'green';
+    let paddle = new Rectangle(xPaddle, yPaddle, widthPaddle, heightPaddle, colorPaddle)
+    paddle.drawRect(ctx);
+
+    //Khai báo thuộc tính cho: Ball
+    let radius = 30;
+    let xBall = widthCanvas/2;
+    let yBall = heightCanvas - radius - heightPaddle;
+    let colorBall = '#f10bee'
+    let ball = new Circle(xBall,yBall,radius,colorBall )
+    let dX = 5;
+    let dY = -5;
+    ball.drawCircle(ctx)
+
+    //Di chuyển thanh: paddle
+    function selectKeyBoard(evt) {
+        console.log('evt ---> ', evt.keyCode)
+        switch (evt.keyCode) {
+            case 37:
+                if(paddle.x <= 0){
+                    return
+                }
+                paddle.moveLeft();
+                console.log('x của paddle --->', paddle.x)
+                break;
+            case 39:
+                if(paddle.x + paddle.width >= widthCanvas){
+                    return;
+                }
+                paddle.moveRight();
+                break;
+        }
+
+        clearCanvas();
+        paddle.drawRect(ctx);
+    }
+
+    addEventListener('keydown', selectKeyBoard)
+
+    //DI CHUYỂN: BALL
+    function moveBall() {
+        ball.moveBall(dX,dY)
+        checkCollisionBallAndPaddle();
+        if(ball.x + ball.radius >= widthCanvas || ball.x - ball.radius <=0) {
+            dX = -dX
+        } else if(ball.y - radius <= 0 || ball.y + ball.radius >= heightCanvas){
+            dY = -dY;
+        }
+
+        console.log('tọa độ X quả bóng --->', ball.x)
+        requestAnimationFrame(moveBall)
+        clearCanvas()
+        ball.drawCircle(ctx)
+        paddle.drawRect(ctx)
+    }
+    moveBall();
+
+    //CHECK VA TRẠM: Ball vs Paddle
+    function checkCollisionBallAndPaddle() {
+        if(ball.x >= paddle.x && ball.x <= paddle.x + paddle.width
+            && ball.y + radius == paddle.y){ //Check va trạm xảy ra khi quả bóng trong khoảng của thanh paddle
+            dY = -dY;
+        } else if(ball.x < paddle.x + paddle.width + radius && ball.y > paddle.y - radius
+            && ball.x > paddle.x-radius){
+            dX = -dX;
+            dY = -dY;
+        }
+    }
+    //clear khung canvas
+    function clearCanvas() {
+        ctx.clearRect(0,0, widthCanvas, heightCanvas);
+    }
+</script>
+</html>
